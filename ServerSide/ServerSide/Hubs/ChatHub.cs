@@ -6,26 +6,26 @@ namespace ServerSide.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task SendMessageAsync(string message, string otherClientNickName)
+        public async Task SendMessageAsync(string message, string receiverNickName)
         {
-            string connectionId = ClientStore.Clients.FirstOrDefault(c => c.NickName == otherClientNickName)?.ConnectionId ?? "";
+            string receiverConnectionId = ClientStore.Clients.FirstOrDefault(c => c.NickName == receiverNickName)?.ConnectionId ?? "";
 
-            if (connectionId is "")
+            if (receiverNickName is "")
             {
-                await Clients.Caller.SendAsync("getErrorMessage", $"Kullanıcı '{otherClientNickName}' bulunamadı.");
+                await Clients.Caller.SendAsync("getErrorMessage", $"Kullanıcı '{receiverNickName}' bulunamadı.");
                 return;
             }
 
-            string senderClientNick = ClientStore.Clients.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId)?.NickName ?? "";
+            string senderNickName = ClientStore.Clients.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId)?.NickName ?? "";
 
-            if(senderClientNick is "")
+            if(senderNickName is "")
             {
                 await Clients.Caller.SendAsync("getErrorMessage", "Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.");
                 return;
             }   
 
-            await Clients.Client(connectionId).SendAsync("receiveMessage", new { Message = message, Client = senderClientNick });
-            await Clients.Caller.SendAsync("receiveMessage", new { Message = message, Client = otherClientNickName });
+            await Clients.Client(receiverConnectionId).SendAsync("receiveMessage", new { Message = message, Client = senderNickName });
+            await Clients.Caller.SendAsync("receiveMessage", new { Message = message, Client = receiverNickName });
 
         }
 
