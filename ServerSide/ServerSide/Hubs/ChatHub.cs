@@ -8,6 +8,20 @@ namespace ServerSide.Hubs
     {
         public async Task SendMessageAsync(string message, string receiverNickName)
         {
+            string senderNickName = ClientStore.Clients.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId)?.NickName ?? "";
+
+            if(senderNickName is "")
+            {
+                await Clients.Caller.SendAsync("getErrorMessage", "Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.");
+                return;
+            }
+
+            if (receiverNickName == "Tümü")
+            {
+                await Clients.Others.SendAsync("receiveMessage", new { Message = message, Client = senderNickName });
+                return;
+            }
+
             string receiverConnectionId = ClientStore.Clients.FirstOrDefault(c => c.NickName == receiverNickName)?.ConnectionId ?? "";
 
             if (receiverNickName is "")
@@ -16,17 +30,7 @@ namespace ServerSide.Hubs
                 return;
             }
 
-            string senderNickName = ClientStore.Clients.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId)?.NickName ?? "";
-
-            if(senderNickName is "")
-            {
-                await Clients.Caller.SendAsync("getErrorMessage", "Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.");
-                return;
-            }   
-
             await Clients.Client(receiverConnectionId).SendAsync("receiveMessage", new { Message = message, Client = senderNickName });
-            await Clients.Caller.SendAsync("receiveMessage", new { Message = message, Client = receiverNickName });
-
         }
 
         public async Task GetNickNameAsync(string nickName)
