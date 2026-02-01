@@ -16,7 +16,17 @@ namespace ServerSide.Hubs
                 return;
             }
 
-            await Clients.Client(connectionId).SendAsync("receiveMessage", new { Message = message, Client = otherClientNickName });
+            string senderClientNick = ClientStore.Clients.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId)?.NickName ?? "";
+
+            if(senderClientNick is "")
+            {
+                await Clients.Caller.SendAsync("getErrorMessage", "Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.");
+                return;
+            }   
+
+            await Clients.Client(connectionId).SendAsync("receiveMessage", new { Message = message, Client = senderClientNick });
+            await Clients.Caller.SendAsync("receiveMessage", new { Message = message, Client = otherClientNickName });
+
         }
 
         public async Task GetNickNameAsync(string nickName)
@@ -30,6 +40,11 @@ namespace ServerSide.Hubs
             ClientStore.Clients.Add(client);
             await Clients.Others.SendAsync("clientJoined", nickName);
             await Clients.All.SendAsync("listclients", ClientStore.Clients);
+        }
+
+        public override async  Task OnConnectedAsync()
+        {
+            await Clients.Caller.SendAsync("listclients", ClientStore.Clients); 
         }
     }
 }

@@ -59,8 +59,8 @@
                     user.html(item.nickName);
                     $("#allclients").append(user);
                 });
-
             });
+            
 
             $("#btnGonder").on("click",() =>{
                 let message = $("#message").val();
@@ -79,15 +79,12 @@
                         $("#errorMessageAlert").fadeOut(2000);
                     },2000);
                 });
-
             });
 
             connection.on("receiveMessage", data => {
-                // var x = $(".message").clone();
-                // x.removeClass("message");
-                // x.find("h5")[1].innerHTML = "";
-                // x.find("h5")[0].innerHTML = "";
-                // $(".messages").append(x);
+                $("#txtOther").html(data.client);
+                $("#txtOther").removeClass("d-none");
+               
             });
         });
     </script>
@@ -130,9 +127,9 @@
 
                     <div class="list-group">
                         <a class="list-group-item list-group-item-action" aria-current="true">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1" style="display: none;" id="txtOther"></h5>
-                                <h5 class="mb-1" style="display: none;" id="txtYou"></h5>
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h5 class="mb-1 d-none" id="txtOther">Other</h5>
+                                <h5 class="mb-1 ms-auto" id="txtYou">You</h5>
                             </div>
                             <p class="mb-1">Donec id elit non mi porta grovida at egat metus. Maecenas sed diam eget risus
                                     varius blandit.</p>
