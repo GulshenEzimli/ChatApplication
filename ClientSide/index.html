@@ -38,7 +38,7 @@
             $("#btnLogin").on("click", () => {
                 const nickname = $("#txtNickName").val();
                 connection.invoke("GetNickNameAsync", nickname).catch(error => `NickName daxil olunarken xeta bas verdi ${error}`);
-                $(".disabled").removeAttr("disabled");
+                $(".disabled").removeClass("disabled").removeAttr("disabled");
             });
 
             connection.on("clientJoined", (nickname) => {
@@ -98,6 +98,21 @@
                 $("#messages").append(leftmessagediv);
             });
 
+            $("#btnAddGroup").click(() => {
+                let groupName = $("#txtGroupName").val();
+                connection.invoke("AddGroupAsync", groupName).catch(error => console.log(`Oda yaratilirken hata olustu: ${error}`));
+
+                $("#txtGroupName").val("");
+            });
+
+            connection.on("listgroups", groups => {
+                let options = "";
+                $.each(groups, (index, item) => {
+                    options += `<option value="${item.groupName}">${item.groupName}</option>`;
+                });
+
+                $(".rooms").html(options);
+            });
         });
     </script>
 
@@ -109,10 +124,10 @@
    <div class="row gy-3">
         
         <div class="col-md-3">
-            <input type="text" class="form-control bg-light mt-3 disabled" placeholder="Oda adi gir">
-            <button class="btn btn-primary w-100 mt-2 disabled" type="button">Oda olusdur</button>
+            <input type="text" id="txtGroupName" class="form-control bg-light mt-3 disabled" placeholder="Oda adi gir">
+            <button id="btnAddGroup" class="btn btn-primary w-100 mt-2 disabled" type="button">Oda olusdur</button>
             <br>
-            <select style="width: 100%;" title="odalar" class="form-select mt-2 disabled" multiple>
+            <select style="width: 100%;" title="odalar" class="form-select mt-2 disabled rooms" multiple>
                 <option selected value="-1" style="width: 100%;" class="bg-dark-subtle">Odalar</option>
             </select>
             <button type="button" class="btn btn-primary mt-2 disabled">Secilmis odaya gir</button>

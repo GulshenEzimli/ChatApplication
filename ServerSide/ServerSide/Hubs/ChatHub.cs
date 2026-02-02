@@ -24,7 +24,7 @@ namespace ServerSide.Hubs
 
             string receiverConnectionId = ClientStore.Clients.FirstOrDefault(c => c.NickName == receiverNickName)?.ConnectionId ?? "";
 
-            if (receiverNickName is "")
+            if (receiverConnectionId is "")
             {
                 await Clients.Caller.SendAsync("getErrorMessage", $"Kullanıcı '{receiverNickName}' bulunamadı.");
                 return;
@@ -49,6 +49,15 @@ namespace ServerSide.Hubs
         public override async  Task OnConnectedAsync()
         {
             await Clients.Caller.SendAsync("listclients", ClientStore.Clients); 
+        }
+
+        public async Task AddGroupAsync(string groupName)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+
+            Group group = new Group(){ GroupName = groupName }; 
+            GroupStore.Groups.Add(group);
+            await Clients.All.SendAsync("listgroups", GroupStore.Groups);
         }
     }
 }
