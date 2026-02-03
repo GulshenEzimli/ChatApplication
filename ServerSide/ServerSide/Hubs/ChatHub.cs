@@ -59,5 +59,13 @@ namespace ServerSide.Hubs
             GroupStore.Groups.Add(group);
             await Clients.All.SendAsync("listgroups", GroupStore.Groups);
         }
+
+        public async Task JoinToGroupAsync(IEnumerable<string> groupNames)
+        {
+            foreach (var groupName in groupNames)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            }
+        }
     }
 }

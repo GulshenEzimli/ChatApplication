@@ -16,9 +16,7 @@ select.rooms option:checked {
     color: #fff;
 }
 
-select.rooms option:hover {
-    background-color: #e9ecef;
-}
+
 
 select.rooms {
     border-radius: 8px;

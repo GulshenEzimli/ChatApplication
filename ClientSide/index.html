@@ -113,6 +113,16 @@
 
                 $(".rooms").html(options);
             });
+
+            $("#btnOdalaraGir").click(() => {
+                let groupNames = [];
+                $(".rooms option:selected").map((i,e) => {
+                    groupNames.push(e.innerHTML);
+                });
+                
+                connection.invoke("JoinToGroupAsync", groupNames).catch(error => console.log(`Odaya giris yaparken hata olustu: ${error}`));
+            });
+
         });
     </script>
 
@@ -130,7 +140,7 @@
             <select style="width: 100%;" title="odalar" class="form-select mt-2 disabled rooms" multiple>
                 <option selected value="-1" style="width: 100%;" class="bg-dark-subtle">Odalar</option>
             </select>
-            <button type="button" class="btn btn-primary mt-2 disabled">Secilmis odaya gir</button>
+            <button type="button" id="btnOdalaraGir" class="btn btn-primary mt-2 disabled">Secilmis odaya gir</button>
             <br><br><br>
             <div class="list-group clients">
                 <a class="list-group-item list-group-item-action users active">Tümü</a>
