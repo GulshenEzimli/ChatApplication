@@ -80,6 +80,26 @@
                 $("#messages").append(rightmessagediv);
             });
 
+            $("#btnGrupaGonder").on("click", () => {
+                let message = $("#message").val();
+                let groupNames = [];
+                let groupsText = "";
+                $(".rooms option:selected").map((i,e) => {
+                    groupNames.push(e.innerHTML);
+                    groupsText += e.innerHTML;
+                });
+                connection.invoke("SendMessageToGroupAsync", message, groupNames).catch(error => `Mesaj gonderilirken hata olustu ${error}.`);
+                $("#message").val("").focus();
+
+                debugger;
+                let names = groupsText.substring(0, groupsText.length - 2)
+                $("#txtGroup").val(names)
+                let rightmessagediv = $(".rightmessagediv").first().clone();
+                rightmessagediv.find("p").html(message);
+                rightmessagediv.removeClass("d-none");
+                $("#messages").append(rightmessagediv);
+            });
+
             connection.on("getErrorMessage", errorMessage => {
                 $("#errorMessageAlert").html(errorMessage);
                 $("#errorMessageAlert").fadeIn(2000, () => {
@@ -102,16 +122,18 @@
                 let groupName = $("#txtGroupName").val();
                 connection.invoke("AddGroupAsync", groupName).catch(error => console.log(`Oda yaratilirken hata olustu: ${error}`));
 
-                $("#txtGroupName").val("");
+                $("#txtGroupName").val("").focus();
             });
 
             connection.on("listgroups", groups => {
-                let options = "";
+                $(".rooms").html("");
+
+                let options = '<option style="width: 100%;" selected value="-1">Odalar</option>';
                 $.each(groups, (index, item) => {
-                    options += `<option value="${item.groupName}">${item.groupName}</option>`;
+                    options += `<option style="width: 100%;" value="${item.groupName}">${item.groupName}</option>`;
                 });
 
-                $(".rooms").html(options);
+                $(".rooms").append(options);
             });
 
             $("#btnOdalaraGir").click(() => {
@@ -121,6 +143,18 @@
                 });
                 
                 connection.invoke("JoinToGroupAsync", groupNames).catch(error => console.log(`Odaya giris yaparken hata olustu: ${error}`));
+                
+                $("#clientDurumMesajlari").html(`Seçilmiş odalara giriş yapıldı.`);
+                $("#clientDurumMesajlari").fadeIn(2000, () => {
+                    setTimeout(() => {
+                        $("#clientDurumMesajlari").fadeOut(2000);
+                    },2000);
+                });
+            });
+
+            $(".rooms").change(function (){
+                let groupNames = $(this).val();
+                connection.invoke("GetGroupClients", groupNames).catch(error => console.log(error));
             });
 
         });
@@ -138,7 +172,7 @@
             <button id="btnAddGroup" class="btn btn-primary w-100 mt-2 disabled" type="button">Oda olusdur</button>
             <br>
             <select style="width: 100%;" title="odalar" class="form-select mt-2 disabled rooms" multiple>
-                <option selected value="-1" style="width: 100%;" class="bg-dark-subtle">Odalar</option>
+                <option selected value="-1" style="width: 100%;" >Odalar</option>
             </select>
             <button type="button" id="btnOdalaraGir" class="btn btn-primary mt-2 disabled">Secilmis odaya gir</button>
             <br><br><br>
@@ -155,10 +189,14 @@
             </div>
             <textarea class="form-control mt-3" id="message" placeholder="İletilecek mesaji buraya giriniz..." 
                       rows="3"></textarea>
+
+            <button type="button" class="btn btn-light mt-2" id="btnGrupaGonder">Grupa Gönder</button>
             <button type="button" class="btn btn-light mt-2" id="btnGonder">Gönder</button>
+            
             <br/><br/><br/>
 
             <div class="d-flex w-100 justify-content-between align-items-center">
+                <h5 class="mb-1 ms-auto" id="txtGroup"></h5>
                 <h5 class="mb-1 ms-auto" id="txtYou">You</h5>
             </div>
 
@@ -172,7 +210,7 @@
                             </div>
                         </div>
 
-                         <div class="mb-2 d-none rightmessagediv text-end">
+                        <div class="mb-2 d-none rightmessagediv text-end">
                             <div class="d-flex justify-content-end">
                                 <p class="p-2 rounded bg-primary text-white mb-1 rightmessage"></p>
                             </div>
